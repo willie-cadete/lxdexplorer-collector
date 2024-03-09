@@ -1,0 +1,11 @@
+Interval: 86400 # seconds
+Retention: 90 # days
+LogLevel: info
+LXD:
+  TLSCertificate: ./keys/client.crt
+  TLSkey: ./keys/client.key
+  CertificateVerify: false
+MongoDB:
+  URI: mongodb://localhost:27017
+HostNodes:
+  - 127.0.0.1
