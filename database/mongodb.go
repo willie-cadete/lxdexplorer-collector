@@ -13,12 +13,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var conf, _ = config.LoadConfig()
+var conf = config.Conf
 
 var database = "lxd-dev"
 
 func connect() *mongo.Client {
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(conf.MongoDB.URI))
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(conf.GetDatabaseURI()))
 	if err != nil {
 		panic(err)
 	}

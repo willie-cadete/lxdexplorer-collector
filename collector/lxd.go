@@ -11,7 +11,7 @@ import (
 	"github.com/canonical/lxd/shared/api"
 )
 
-var conf, _ = config.LoadConfig()
+var conf = config.Conf
 
 type HostNode struct {
 	CollectedAt time.Time   `bson:"collectedat"`
@@ -43,13 +43,13 @@ type Container struct {
 func connectionOptions() *lxd.ConnectionArgs {
 	c := conf
 
-	TLSCertificate, _ := os.ReadFile(c.LXD.TLSCertificate)
-	TLSKey, _ := os.ReadFile(c.LXD.TLSKey)
+	TLSCertificate, _ := os.ReadFile(c.GetLXDTLSCertificate())
+	TLSKey, _ := os.ReadFile(c.GetLXDTLSKey())
 
 	args := lxd.ConnectionArgs{
 		TLSClientCert:      string(TLSCertificate),
 		TLSClientKey:       string(TLSKey),
-		InsecureSkipVerify: !c.LXD.CertificateVerify,
+		InsecureSkipVerify: !c.GetLXDTLSVerify(),
 		SkipGetServer:      false,
 	}
 
@@ -69,7 +69,7 @@ func Connect(h string) lxd.InstanceServer {
 
 func getHostnodes() []string {
 	c := conf
-	return c.HostNodes
+	return c.GetHostnodes()
 }
 
 func ParseContainer(c api.ContainerFull, h string) Container {
@@ -110,11 +110,11 @@ func ParseContainer(c api.ContainerFull, h string) Container {
 }
 
 func AddLXDTTLs() {
-	database.AddTTL("containers", "collectedat", int32(conf.Interval))
-	log.Printf("Fetcher: Added TTL to containers collection: %d seconds", conf.Interval)
+	database.AddTTL("containers", "collectedat", int32(conf.GetCollectorInterval()))
+	log.Printf("Fetcher: Added TTL to containers collection: %d seconds", conf.GetCollectorInterval())
 
-	log.Printf("Fetcher: Added TTL to history collection: %d days", conf.Retention)
-	database.AddTTL("history", "collectedat", int32(conf.Retention*60*60*24))
+	log.Printf("Fetcher: Added TTL to history collection: %d days", conf.GetCollectorRetention())
+	database.AddTTL("history", "collectedat", int32(conf.GetCollectorRetention()*60*60*24))
 }
 
 func collect() {
@@ -139,7 +139,7 @@ func collect() {
 
 	}
 
-	time.Sleep(time.Duration(conf.Interval) * time.Second)
+	time.Sleep(time.Duration(conf.GetCollectorInterval()) * time.Second)
 }
 
 func StartFetcher() {
