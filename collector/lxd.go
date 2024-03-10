@@ -1,11 +1,12 @@
 package fetcher
 
 import (
-	"log"
 	"lxdexplorer-collector/config"
 	"lxdexplorer-collector/database"
 	"os"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	lxd "github.com/canonical/lxd/client"
 	"github.com/canonical/lxd/shared/api"
