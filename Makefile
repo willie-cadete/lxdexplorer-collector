@@ -32,6 +32,9 @@ dep: ## Get the dependencies
 clean: ## Remove previous build
 	@rm -rvf dist/*
 
+run:
+	@go run cmd/collector/main.go
+
 docker:
 	@docker build -t lxdexplorer-collector:$(SEMVER) .
 

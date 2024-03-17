@@ -1,10 +1,11 @@
-package fetcher
+package collector
 
 import (
-	"lxdexplorer-collector/config"
-	"lxdexplorer-collector/database"
 	"os"
 	"time"
+
+	"github.com/willie-cadete/lxdexplorer-collector/config"
+	"github.com/willie-cadete/lxdexplorer-collector/database"
 
 	log "github.com/sirupsen/logrus"
 

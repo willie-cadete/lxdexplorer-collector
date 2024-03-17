@@ -1,4 +1,4 @@
-module lxdexplorer-collector
+module github.com/willie-cadete/lxdexplorer-collector
 
 go 1.22
 

@@ -3,7 +3,8 @@ package database
 import (
 	"context"
 	"fmt"
-	"lxdexplorer-collector/config"
+
+	"github.com/willie-cadete/lxdexplorer-collector/config"
 
 	log "github.com/sirupsen/logrus"
 

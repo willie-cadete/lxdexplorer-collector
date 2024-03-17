@@ -1,9 +1,10 @@
 package config_test
 
 import (
-	"lxdexplorer-collector/config"
 	"os"
 	"testing"
+
+	"github.com/willie-cadete/lxdexplorer-collector/config"
 
 	"github.com/stretchr/testify/assert"
 )
