@@ -65,6 +65,58 @@ func TestLoadConfigWithCustomValues(t *testing.T) {
 	assert.Equal(t, expected, cfg)
 }
 
+func TestGetHostNodes(t *testing.T) {
+	cfg, _ := config.LoadConfig("testdata")
+
+	expected := []string{"127.0.0.2"}
+
+	assert.Equal(t, expected, cfg.GetHostnodes())
+}
+
+func TestGetTLS(t *testing.T) {
+	cfg, _ := config.LoadConfig("testdata")
+
+	expected := config.TLS{
+		Cert:   "./tls/client.crt",
+		Key:    "./tls/client.key",
+		Verify: true,
+	}
+
+	assert.Equal(t, expected, cfg.GetTLS())
+}
+
+func TestGetDatabaseURI(t *testing.T) {
+	cfg, _ := config.LoadConfig("testdata")
+
+	expected := "mongodb://localhost:27016"
+
+	assert.Equal(t, expected, cfg.GetDatabaseURI())
+}
+
+func TestGetCollectorInterval(t *testing.T) {
+	cfg, _ := config.LoadConfig("testdata")
+
+	expected := 10
+
+	assert.Equal(t, expected, cfg.GetCollectorInterval())
+}
+
+func TestGetCollectorRetention(t *testing.T) {
+	cfg, _ := config.LoadConfig("testdata")
+
+	expected := 10
+
+	assert.Equal(t, expected, cfg.GetCollectorRetention())
+}
+
+func TestGetLoggingLevel(t *testing.T) {
+	cfg, _ := config.LoadConfig("testdata")
+
+	expected := "warn"
+
+	assert.Equal(t, expected, cfg.GetLoggingLevel())
+}
+
 func TestLoadConfigWithEnvVariablesOverride(t *testing.T) {
 	// Set environment variables
 	_ = os.Setenv("COLLECTOR_INTERVAL", "5")
@@ -102,55 +154,3 @@ func TestLoadConfigWithEnvVariablesOverride(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, expected, cfg)
 }
-
-// func TestGetHostNodes(t *testing.T) {
-// 	cfg, _ := config.LoadConfig("testdata")
-
-// 	expected := []string{"127.0.0.2"}
-
-// 	assert.Equal(t, expected, cfg.GetHostnodes())
-// }
-
-// func TestGetTLS(t *testing.T) {
-// 	cfg, _ := config.LoadConfig("testdata")
-
-// 	expected := config.TLS{
-// 		Cert:   "./tls/client.crt",
-// 		Key:    "./tls/client.key",
-// 		Verify: true,
-// 	}
-
-// 	assert.Equal(t, expected, cfg.GetTLS())
-// }
-
-// func TestGetDatabaseURI(t *testing.T) {
-// 	cfg, _ := config.LoadConfig("testdata")
-
-// 	expected := "mongodb://localhost:27016"
-
-// 	assert.Equal(t, expected, cfg.GetDatabaseURI())
-// }
-
-// func TestGetCollectorInterval(t *testing.T) {
-// 	cfg, _ := config.LoadConfig("testdata")
-
-// 	expected := 10
-
-// 	assert.Equal(t, expected, cfg.GetCollectorInterval())
-// }
-
-// func TestGetCollectorRetention(t *testing.T) {
-// 	cfg, _ := config.LoadConfig("testdata")
-
-// 	expected := 10
-
-// 	assert.Equal(t, expected, cfg.GetCollectorRetention())
-// }
-
-// func TestGetLoggingLevel(t *testing.T) {
-// 	cfg, _ := config.LoadConfig("testdata")
-
-// 	expected := "warn"
-
-// 	assert.Equal(t, expected, cfg.GetLoggingLevel())
-// }
