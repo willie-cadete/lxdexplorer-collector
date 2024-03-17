@@ -22,7 +22,7 @@ func DefaultHostnodes() []string {
 	return []string{"https://localhost:8443"}
 }
 
-var Conf, _ = LoadConfig(".")
+var Conf, _ = LoadConfig(".") // TODO: Remove This later
 
 // Config is a struct that holds the configuration of the application
 type Config struct {

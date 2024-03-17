@@ -4,7 +4,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/willie-cadete/lxdexplorer-collector/config"
 	"github.com/willie-cadete/lxdexplorer-collector/database"
 
 	log "github.com/sirupsen/logrus"
@@ -13,54 +12,8 @@ import (
 	"github.com/canonical/lxd/shared/api"
 )
 
-var conf = config.Conf
-
-type HostNode struct {
-	CollectedAt time.Time   `bson:"collectedat"`
-	Hostname    string      `bson:"hostname"`
-	Containers  interface{} `bson:"containers"`
-}
-
-type Network struct {
-	IPs     string `bson:"ips"`
-	Netmask string `bson:"netmask"`
-	CIDR    string `bson:"cidr"`
-}
-
-type OS struct {
-	Distribution string `bson:"distribution"`
-	Version      string `bson:"version"`
-}
-
-type Container struct {
-	CollectedAt time.Time `bson:"collectedat"`
-	Name        string    `bson:"name"`
-	Hostnode    string    `bson:"hostnode"`
-	Status      string    `bson:"status"`
-	Network     Network   `bson:"network"`
-	OS          OS        `bson:"os"`
-	ImageID     string    `bson:"imageid"`
-}
-
-func connectionOptions() *lxd.ConnectionArgs {
-	c := conf
-
-	TLSCertificate, _ := os.ReadFile(c.GetLXDTLSCertificate())
-	TLSKey, _ := os.ReadFile(c.GetLXDTLSKey())
-
-	args := lxd.ConnectionArgs{
-		TLSClientCert:      string(TLSCertificate),
-		TLSClientKey:       string(TLSKey),
-		InsecureSkipVerify: !c.GetLXDTLSVerify(),
-		SkipGetServer:      false,
-	}
-
-	return &args
-
-}
-
-func Connect(h string) lxd.InstanceServer {
-	args := connectionOptions()
+func (s *Collector) Connect(h string) lxd.InstanceServer {
+	args := s.connectionOptions()
 
 	cnn, err := lxd.ConnectLXD("https://"+h+":8443", args)
 	if err != nil {
@@ -69,12 +22,7 @@ func Connect(h string) lxd.InstanceServer {
 	return cnn
 }
 
-func getHostnodes() []string {
-	c := conf
-	return c.GetHostnodes()
-}
-
-func ParseContainer(c api.ContainerFull, h string) Container {
+func (s *Collector) ParseContainer(c api.ContainerFull, h string) Container {
 
 	if c.State.Status == "Stopped" {
 		return Container{
@@ -111,27 +59,27 @@ func ParseContainer(c api.ContainerFull, h string) Container {
 	}
 }
 
-func AddLXDTTLs() {
-	database.AddTTL("containers", "collectedat", int32(conf.GetCollectorInterval()))
-	log.Printf("Fetcher: Added TTL to containers collection: %d seconds", conf.GetCollectorInterval())
+func (s *Collector) AddLXDTTLs() {
+	database.AddTTL("containers", "collectedat", int32(s.config.GetCollectorInterval()))
+	log.Printf("Fetcher: Added TTL to containers collection: %d seconds", s.config.GetCollectorInterval())
 
-	log.Printf("Fetcher: Added TTL to history collection: %d days", conf.GetCollectorRetention())
-	database.AddTTL("history", "collectedat", int32(conf.GetCollectorRetention()*60*60*24))
+	log.Printf("Fetcher: Added TTL to history collection: %d days", s.config.GetCollectorRetention())
+	database.AddTTL("history", "collectedat", int32(s.config.GetCollectorRetention()*60*60*24))
 }
 
-func collect() {
+func (s *Collector) WorkerCollect() {
 
 	collectedAt := time.Now().UTC()
 
-	for _, h := range getHostnodes() {
-		c := Connect(h)
+	for _, h := range s.getHostnodes() {
+		c := s.Connect(h)
 		if c == nil {
 			continue
 		}
 		cs, _ := c.GetContainersFull()
 
 		for _, c := range cs {
-			container := ParseContainer(c, h)
+			container := s.ParseContainer(c, h)
 			database.InsertMany("containers", []interface{}{Container{CollectedAt: collectedAt, Name: container.Name, Hostnode: container.Hostnode, Status: container.Status, Network: container.Network, OS: container.OS, ImageID: container.ImageID}})
 		}
 		log.Println("Fetcher: Inserted", len(cs), "containers from", h)
@@ -141,12 +89,25 @@ func collect() {
 
 	}
 
-	time.Sleep(time.Duration(conf.GetCollectorInterval()) * time.Second)
 }
 
-func StartFetcher() {
-	AddLXDTTLs()
-	for {
-		collect()
+func (s *Collector) connectionOptions() *lxd.ConnectionArgs {
+
+	TLSCertificate, _ := os.ReadFile(s.config.GetLXDTLSCertificate())
+	TLSKey, _ := os.ReadFile(s.config.GetLXDTLSKey())
+
+	args := lxd.ConnectionArgs{
+		TLSClientCert:      string(TLSCertificate),
+		TLSClientKey:       string(TLSKey),
+		InsecureSkipVerify: !s.config.GetLXDTLSVerify(),
+		SkipGetServer:      false,
 	}
+
+	return &args
+
+}
+
+func (s *Collector) getHostnodes() []string {
+
+	return s.config.GetHostnodes()
 }
