@@ -4,8 +4,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/willie-cadete/lxdexplorer-collector/database"
-
 	log "github.com/sirupsen/logrus"
 
 	lxd "github.com/canonical/lxd/client"
@@ -60,11 +58,11 @@ func (s *Collector) ParseContainer(c api.ContainerFull, h string) Container {
 }
 
 func (s *Collector) AddLXDTTLs() {
-	database.AddTTL("containers", "collectedat", int32(s.config.GetCollectorInterval()))
+	s.database.AddTTL("containers", "collectedat", int32(s.config.GetCollectorInterval()))
 	log.Printf("Fetcher: Added TTL to containers collection: %d seconds", s.config.GetCollectorInterval())
 
 	log.Printf("Fetcher: Added TTL to history collection: %d days", s.config.GetCollectorRetention())
-	database.AddTTL("history", "collectedat", int32(s.config.GetCollectorRetention()*60*60*24))
+	s.database.AddTTL("history", "collectedat", int32(s.config.GetCollectorRetention()*60*60*24))
 }
 
 func (s *Collector) WorkerCollect() {
@@ -80,11 +78,11 @@ func (s *Collector) WorkerCollect() {
 
 		for _, c := range cs {
 			container := s.ParseContainer(c, h)
-			database.InsertMany("containers", []interface{}{Container{CollectedAt: collectedAt, Name: container.Name, Hostnode: container.Hostnode, Status: container.Status, Network: container.Network, OS: container.OS, ImageID: container.ImageID}})
+			s.database.InsertMany("containers", []interface{}{Container{CollectedAt: collectedAt, Name: container.Name, Hostnode: container.Hostnode, Status: container.Status, Network: container.Network, OS: container.OS, ImageID: container.ImageID}})
 		}
 		log.Println("Fetcher: Inserted", len(cs), "containers from", h)
 
-		database.InsertMany("history", []interface{}{HostNode{CollectedAt: collectedAt, Hostname: h, Containers: cs}})
+		s.database.InsertMany("history", []interface{}{HostNode{CollectedAt: collectedAt, Hostname: h, Containers: cs}})
 		log.Println("Fetcher: Inserted", len(cs), "containers from hostnode:", h)
 
 	}

@@ -22,8 +22,6 @@ func DefaultHostnodes() []string {
 	return []string{"https://localhost:8443"}
 }
 
-var Conf, _ = LoadConfig(".") // TODO: Remove This later
-
 func (c *Config) GetHostnodes() []string {
 	return c.LXD.Hostnodes
 }
@@ -76,6 +74,8 @@ func LoadConfig(fp string) (*Config, error) {
 	viper.SetConfigType("yaml")
 	viper.SetConfigName("config")
 	viper.AddConfigPath(fp)
+
+	log.Debugf("Loading config file: %s", fp)
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {

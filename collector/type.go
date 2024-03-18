@@ -34,15 +34,23 @@ type Container struct {
 }
 
 type Collector struct {
-	config *config.Config
+	config   *config.Config
+	database Database
 }
 
 type Options struct {
-	Config *config.Config
+	Config   *config.Config
+	Database Database
 }
 
 func NewCollector(opts Options) *Collector {
 	return &Collector{
-		config: opts.Config,
+		config:   opts.Config,
+		database: opts.Database,
 	}
+}
+
+type Database interface {
+	AddTTL(collection string, field string, seconds int32)
+	InsertMany(collection string, documents []interface{})
 }

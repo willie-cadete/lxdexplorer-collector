@@ -5,10 +5,11 @@ import (
 
 	"github.com/willie-cadete/lxdexplorer-collector/collector"
 	"github.com/willie-cadete/lxdexplorer-collector/config"
+	"github.com/willie-cadete/lxdexplorer-collector/database"
 )
 
 func main() {
-	conf, err := config.LoadConfig("/Users/willie/Documents/projects/lxdexplorer-collector/config.yaml")
+	conf, err := config.LoadConfig("/Users/willie/Documents/projects/lxdexplorer-collector/")
 	if err != nil {
 		panic(err)
 	}
@@ -17,10 +18,18 @@ func main() {
 }
 
 func startCollector(conf *config.Config) {
-	// Create a new collector
-	collect := collector.NewCollector(collector.Options{
+
+	database := database.NewDatabase(database.Options{
 		Config: conf,
 	})
+
+	// Create a new collector
+	collect := collector.NewCollector(collector.Options{
+		Config:   conf,
+		Database: database,
+	})
+
+	// Start the collector
 
 	collect.AddLXDTTLs()
 	for {

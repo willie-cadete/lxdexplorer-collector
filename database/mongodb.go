@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/willie-cadete/lxdexplorer-collector/config"
-
 	log "github.com/sirupsen/logrus"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,30 +12,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var conf = config.Conf
-
 var database = "lxd-dev"
 
-func connect() *mongo.Client {
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(conf.GetDatabaseURI()))
-	if err != nil {
-		panic(err)
-	}
-
-	ping(client)
-
-	return client
-}
-
-func ping(c *mongo.Client) {
-	err := c.Ping(context.Background(), nil)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func InsertOne(collection string, document interface{}) {
-	c := connect()
+func (s *Database) InsertOne(collection string, document interface{}) {
+	c := s.connect()
 	defer c.Disconnect(context.Background())
 
 	i, err := c.Database(database).Collection(collection).InsertOne(context.TODO(), document)
@@ -48,8 +26,9 @@ func InsertOne(collection string, document interface{}) {
 
 }
 
-func InsertMany(collection string, documents []interface{}) {
-	c := connect()
+// TODO: Return Error
+func (s *Database) InsertMany(collection string, documents []interface{}) {
+	c := s.connect()
 	defer c.Disconnect(context.Background())
 
 	i, err := c.Database(database).Collection(collection).InsertMany(context.TODO(), documents)
@@ -60,15 +39,15 @@ func InsertMany(collection string, documents []interface{}) {
 
 }
 
-func FindOne(collection string, filter interface{}) *mongo.SingleResult {
-	c := connect()
+func (s *Database) FindOne(collection string, filter interface{}) *mongo.SingleResult {
+	c := s.connect()
 	defer c.Disconnect(context.Background())
 
 	return c.Database(database).Collection(collection).FindOne(context.Background(), filter)
 }
 
-func FindAll(collection string) ([]primitive.M, error) {
-	c := connect()
+func (s *Database) FindAll(collection string) ([]primitive.M, error) {
+	c := s.connect()
 	defer c.Disconnect(context.Background())
 
 	cur, err := c.Database(database).Collection(collection).Find(context.Background(), bson.D{})
@@ -93,15 +72,16 @@ func FindAll(collection string) ([]primitive.M, error) {
 
 }
 
-func ReplaceOne(collection string, filter interface{}, replacement interface{}) (*mongo.UpdateResult, error) {
-	c := connect()
+func (s *Database) ReplaceOne(collection string, filter interface{}, replacement interface{}) (*mongo.UpdateResult, error) {
+	c := s.connect()
 	defer c.Disconnect(context.Background())
 
 	return c.Database(database).Collection(collection).ReplaceOne(context.Background(), filter, replacement)
 }
 
-func AddTTL(collection string, field string, seconds int32) {
-	c := connect()
+// TODO: Return Error
+func (s *Database) AddTTL(collection string, field string, seconds int32) {
+	c := s.connect()
 	defer c.Disconnect(context.Background())
 
 	indexModel := mongo.IndexModel{
@@ -131,4 +111,22 @@ func AddTTL(collection string, field string, seconds int32) {
 		}
 	}
 
+}
+
+func (s *Database) connect() *mongo.Client {
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(s.config.GetDatabaseURI()))
+	if err != nil {
+		panic(err)
+	}
+
+	s.ping(client)
+
+	return client
+}
+
+func (s *Database) ping(c *mongo.Client) {
+	err := c.Ping(context.Background(), nil)
+	if err != nil {
+		panic(err)
+	}
 }
