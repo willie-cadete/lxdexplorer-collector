@@ -26,6 +26,13 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: willie-cadete/lxdexplorer-collector
 
+      - name: Run codacy-coverage-reporter
+        uses: codacy/codacy-coverage-reporter-action@v1
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: coverage.txt
+          force-coverage-parser: go
+
   build:
     runs-on: ubuntu-latest
     needs: test
