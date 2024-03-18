@@ -23,6 +23,6 @@ go.work
 # Project files
 keys
 config.yaml
-!config/config.yaml
+!config/testdata/config.yaml
 dist/*
 !dist/.gitkeep

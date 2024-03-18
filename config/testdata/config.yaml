@@ -1,0 +1,14 @@
+collector:
+  interval: 10 # seconds
+  retention: 10 # days
+logging:
+  level: warn
+database:
+  uri: mongodb://localhost:27016
+lxd:
+  tls:
+    certificate: ./tls/client.crt
+    key: ./tls/client.key
+    verify: true
+  hostnodes:
+    - 127.0.0.2
