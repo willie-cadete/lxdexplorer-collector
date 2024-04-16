@@ -26,3 +26,4 @@ config.yaml
 !config/testdata/config.yaml
 dist/*
 !dist/.gitkeep
+vendor
