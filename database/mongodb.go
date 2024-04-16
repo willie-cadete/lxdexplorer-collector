@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"fmt"
 
 	log "github.com/sirupsen/logrus"
 
@@ -80,7 +79,7 @@ func (s *Database) ReplaceOne(collection string, filter interface{}, replacement
 }
 
 // TODO: Return Error
-func (s *Database) AddTTL(collection string, field string, seconds int32) {
+func (s *Database) AddTTL(collection string, field string, seconds int32) error {
 	c := s.connect()
 	defer c.Disconnect(context.Background())
 
@@ -92,25 +91,22 @@ func (s *Database) AddTTL(collection string, field string, seconds int32) {
 	indexView := c.Database(database).Collection(collection).Indexes()
 
 	// Create a new index
-	var err error
-	_, err = indexView.CreateOne(context.Background(), indexModel)
+	_, err := indexView.CreateOne(context.Background(), indexModel)
 	if err != nil {
-		// Drop the existing index
-		log.Println(err)
+		// Drop the existing indexx``
 		_, err := indexView.DropOne(context.Background(), string(field+"_1"))
 		if err != nil {
-			// Handle error
-			fmt.Println(err)
+			return err
 		}
 		// log.Printf("Database: Dropped existing TTL index on %s\n", field)
 		// Create a new index
 		_, err = indexView.CreateOne(context.Background(), indexModel)
 		if err != nil {
-			// Handle error
-			log.Println(err)
+			return err
 		}
 	}
 
+	return nil
 }
 
 func (s *Database) connect() *mongo.Client {

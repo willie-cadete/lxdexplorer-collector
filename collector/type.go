@@ -51,6 +51,6 @@ func NewCollector(opts Options) *Collector {
 }
 
 type Database interface {
-	AddTTL(collection string, field string, seconds int32)
+	AddTTL(collection string, field string, seconds int32) error
 	InsertMany(collection string, documents []interface{})
 }

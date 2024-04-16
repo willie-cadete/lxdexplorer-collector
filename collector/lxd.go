@@ -57,12 +57,16 @@ func (s *Collector) ParseContainer(c api.ContainerFull, h string) Container {
 	}
 }
 
-func (s *Collector) AddLXDTTLs() {
-	s.database.AddTTL("containers", "collectedat", int32(s.config.GetCollectorInterval()))
+func (s *Collector) AddLXDTTLs() error {
+	err := s.database.AddTTL("containers", "collectedat", int32(s.config.GetCollectorInterval()))
+	if err != nil {
+		return err
+	}
 	log.Printf("Fetcher: Added TTL to containers collection: %d seconds", s.config.GetCollectorInterval())
 
 	log.Printf("Fetcher: Added TTL to history collection: %d days", s.config.GetCollectorRetention())
-	s.database.AddTTL("history", "collectedat", int32(s.config.GetCollectorRetention()*60*60*24))
+	err = s.database.AddTTL("history", "collectedat", int32(s.config.GetCollectorRetention()*60*60*24))
+	return err
 }
 
 func (s *Collector) WorkerCollect() {
