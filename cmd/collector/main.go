@@ -8,7 +8,12 @@ import (
 	"github.com/willie-cadete/lxdexplorer-collector/database"
 )
 
+var version string
+
 func main() {
+	// print the version
+	println("LXD Explorer Collector Version: " + version)
+
 	conf, err := config.LoadConfig("/Users/willie/Documents/projects/lxdexplorer-collector/")
 	if err != nil {
 		panic(err)
