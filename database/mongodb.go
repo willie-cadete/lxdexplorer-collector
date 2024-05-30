@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var database = "lxd-dev"
+var database = "lxd"
 
 func (s *Database) InsertOne(collection string, document interface{}) {
 	c := s.connect()
