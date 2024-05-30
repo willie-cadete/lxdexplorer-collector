@@ -71,5 +71,5 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            VERSION=${{ github.ref }}
+            VERSION=${{ github.ref_name }}
             DOCKERFILE=Dockerfile
