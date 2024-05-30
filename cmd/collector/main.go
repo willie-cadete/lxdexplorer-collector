@@ -14,7 +14,8 @@ func main() {
 	// print the version
 	println("LXD Explorer Collector Version: " + version)
 
-	conf, err := config.LoadConfig("/Users/willie/Documents/projects/lxdexplorer-collector/")
+	// TODO: Implement the reading configuration file dynamically from different paths
+	conf, err := config.LoadConfig(".")
 	if err != nil {
 		panic(err)
 	}
