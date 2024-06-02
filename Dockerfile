@@ -18,9 +18,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-X main.version=$VERSION" -o lxdexplorer-collector cmd/collector/main.go
 
 # Stage 2: Create a minimal runtime image
-FROM debian:bookworm-slim
-
-RUN apt-get update && apt-get install -y ca-certificates
+FROM alpine:3.20
 
 WORKDIR /app/
 
