@@ -4,10 +4,10 @@ import (
 	"os"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	lxd "github.com/canonical/lxd/client"
 	"github.com/canonical/lxd/shared/api"
+	log "github.com/sirupsen/logrus"
+	"github.com/willie-cadete/lxdexplorer-collector/utils"
 )
 
 func (s *Collector) Connect(h string) lxd.InstanceServer {
@@ -22,27 +22,27 @@ func (s *Collector) Connect(h string) lxd.InstanceServer {
 
 func (s *Collector) ParseContainer(c api.ContainerFull, h string) Container {
 
-	if c.State.Status == "Stopped" {
+	if utils.Capitalize(c.State.Status) == "Stopped" {
 		return Container{
-			Name:     c.Name,
-			Hostnode: h,
-			Status:   c.State.Status,
+			Name:     utils.Lowercase(c.Name),
+			Hostnode: utils.Lowercase(h),
+			Status:   utils.Capitalize(c.State.Status),
 			Network: Network{
 				IPs:     "N/A",
 				Netmask: "N/A",
 				CIDR:    "N/A",
 			},
 			OS: OS{
-				Distribution: c.Config["image.os"],
-				Version:      c.Config["image.release"],
+				Distribution: utils.Capitalize(c.Config["image.os"]),
+				Version:      utils.Capitalize(c.Config["image.release"]),
 			},
 			ImageID: c.Config["volatile.base_image"][:6],
 		}
 	}
 
 	return Container{
-		Name:     c.Name,
-		Hostnode: h,
+		Name:     utils.Lowercase(c.Name),
+		Hostnode: utils.Lowercase(h),
 		Status:   c.State.Status,
 		Network: Network{
 			IPs:     c.State.Network["eth0"].Addresses[0].Address,
@@ -50,8 +50,8 @@ func (s *Collector) ParseContainer(c api.ContainerFull, h string) Container {
 			CIDR:    c.State.Network["eth0"].Addresses[0].Address + "/" + c.State.Network["eth0"].Addresses[0].Netmask,
 		},
 		OS: OS{
-			Distribution: c.Config["image.os"],
-			Version:      c.Config["image.release"],
+			Distribution: utils.Capitalize(c.Config["image.os"]),
+			Version:      utils.Capitalize(c.Config["image.release"]),
 		},
 		ImageID: c.Config["volatile.base_image"][:6],
 	}
@@ -81,10 +81,12 @@ func (s *Collector) WorkerCollect() {
 		cs, _ := c.GetContainersFull()
 
 		for _, c := range cs {
+			log.Debugln("Fetcher: ", c.Name, h)
+			log.Debugln("Fetcher: Parsing container", c.Name, "has status", c.State, c.Config, "from", h)
 			container := s.ParseContainer(c, h)
+			log.Debugln("Fetcher: Parsed container", container.Name, "has status", container.Status, container.Network, container.OS, container.ImageID, "from", h)
 			s.database.InsertMany("containers", []interface{}{Container{CollectedAt: collectedAt, Name: container.Name, Hostnode: container.Hostnode, Status: container.Status, Network: container.Network, OS: container.OS, ImageID: container.ImageID}})
 		}
-		log.Println("Fetcher: Inserted", len(cs), "containers from", h)
 
 		s.database.InsertMany("history", []interface{}{HostNode{CollectedAt: collectedAt, Hostname: h, Containers: cs}})
 		log.Println("Fetcher: Inserted", len(cs), "containers from hostnode:", h)
@@ -111,5 +113,9 @@ func (s *Collector) connectionOptions() *lxd.ConnectionArgs {
 
 func (s *Collector) getHostnodes() []string {
 
-	return s.config.GetHostnodes()
+	hostnodes := s.config.GetHostnodes()
+	for i, node := range hostnodes {
+		hostnodes[i] = utils.Lowercase(node)
+	}
+	return hostnodes
 }
