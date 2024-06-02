@@ -9,6 +9,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	lxd_cert = "./tls/client.crt"
+	lxd_key  = "./tls/client.key"
+)
+
 func TestLoadConfigWithDefaults(t *testing.T) {
 	cfg, err := config.LoadConfig("NotExistingPath")
 
@@ -25,8 +30,8 @@ func TestLoadConfigWithDefaults(t *testing.T) {
 		},
 		LXD: config.LXD{
 			TLS: config.TLS{
-				Cert:   "./tls/client.crt",
-				Key:    "./tls/client.key",
+				Cert:   lxd_cert,
+				Key:    lxd_key,
 				Verify: false,
 			},
 			Hostnodes: []string{"https://localhost:8443"},
@@ -53,8 +58,8 @@ func TestLoadConfigWithCustomValues(t *testing.T) {
 		},
 		LXD: config.LXD{
 			TLS: config.TLS{
-				Cert:   "./tls/client.crt",
-				Key:    "./tls/client.key",
+				Cert:   lxd_cert,
+				Key:    lxd_key,
 				Verify: true,
 			},
 			Hostnodes: []string{"127.0.0.2"},
@@ -77,8 +82,8 @@ func TestGetTLS(t *testing.T) {
 	cfg, _ := config.LoadConfig("testdata")
 
 	expected := config.TLS{
-		Cert:   "./tls/client.crt",
-		Key:    "./tls/client.key",
+		Cert:   lxd_cert,
+		Key:    lxd_key,
 		Verify: true,
 	}
 

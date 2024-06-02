@@ -11,6 +11,13 @@ import (
 	"github.com/willie-cadete/lxdexplorer-collector/config"
 )
 
+const (
+	mongodb_uri = "mongodb://localhost:27017"
+	lxd_host    = "localhost"
+	lxd_cert    = "./tls/client.crt"
+	lxd_key     = "./tls/client.key"
+)
+
 func TestConnect(t *testing.T) {
 
 	tests := []struct {
@@ -31,15 +38,15 @@ func TestConnect(t *testing.T) {
 					Level: "info",
 				},
 				Database: config.Database{
-					URI: "mongodb://localhost:27017",
+					URI: mongodb_uri,
 				},
 				LXD: config.LXD{
 					TLS: config.TLS{
-						Cert:   "./tls/client.crt",
-						Key:    "./tls/client.key",
+						Cert:   lxd_cert,
+						Key:    lxd_key,
 						Verify: false,
 					},
-					Hostnodes: []string{"https://localhost:8443"},
+					Hostnodes: []string{lxd_host},
 				},
 			},
 			host: "invalidhost",
@@ -79,15 +86,15 @@ func TestAddLXDTTLs(t *testing.T) {
 					Level: "info",
 				},
 				Database: config.Database{
-					URI: "mongodb://localhost:27017",
+					URI: mongodb_uri,
 				},
 				LXD: config.LXD{
 					TLS: config.TLS{
-						Cert:   "./tls/client.crt",
-						Key:    "./tls/client.key",
+						Cert:   lxd_cert,
+						Key:    lxd_key,
 						Verify: false,
 					},
-					Hostnodes: []string{"https://localhost:8443"},
+					Hostnodes: []string{lxd_host},
 				},
 			},
 			asset: func(err error) {
@@ -108,15 +115,15 @@ func TestAddLXDTTLs(t *testing.T) {
 					Level: "info",
 				},
 				Database: config.Database{
-					URI: "mongodb://localhost:27017",
+					URI: mongodb_uri,
 				},
 				LXD: config.LXD{
 					TLS: config.TLS{
-						Cert:   "./tls/client.crt",
-						Key:    "./tls/client.key",
+						Cert:   lxd_cert,
+						Key:    lxd_key,
 						Verify: false,
 					},
-					Hostnodes: []string{"https://localhost:8443"},
+					Hostnodes: []string{lxd_host},
 				},
 			},
 			asset: func(err error) {
