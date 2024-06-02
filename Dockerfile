@@ -20,6 +20,12 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-X main.version=$VERSION" -o lxd
 # Stage 2: Create a minimal runtime image
 FROM alpine:3.20
 
+RUN addgroup -S nonroot \
+    && adduser -S nonroot -G nonroot
+
+# Create a non-root user
+USER nonroot
+
 WORKDIR /app/
 
 # Copy the built Go application from the previous stage
