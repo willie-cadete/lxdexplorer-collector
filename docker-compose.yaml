@@ -1,7 +1,21 @@
-version: "3"
 services:
-  app:
+  collector:
     build: .
     volumes:
       - ./config.yaml:/app/config.yaml
       - ./keys:/app/keys
+    environment:
+      - DATABASE_URI=mongodb://mongo:27017
+      - LOGGING_LEVEL=debug
+
+  api:
+    image: williecadete/lxdexplorer-api:0.0.6
+    ports:
+      - "8080:80"
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
