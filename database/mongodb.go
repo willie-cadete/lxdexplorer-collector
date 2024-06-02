@@ -21,7 +21,7 @@ func (s *Database) InsertOne(collection string, document interface{}) {
 	if err != nil {
 		panic(err)
 	}
-	log.Printf("Database: Inserted document with ID %v\n", i.InsertedID)
+	log.Debugf("Database: Inserted document with ID %v\n", i.InsertedID)
 
 }
 
@@ -34,7 +34,7 @@ func (s *Database) InsertMany(collection string, documents []interface{}) {
 	if err != nil {
 		panic(err)
 	}
-	log.Printf("Database: Inserted %v documents with IDs %v\n", len(i.InsertedIDs), i.InsertedIDs)
+	log.Debugf("Database: Inserted %v documents with IDs %v\n", len(i.InsertedIDs), i.InsertedIDs)
 
 }
 

@@ -15,7 +15,7 @@ func (s *Collector) Connect(h string) lxd.InstanceServer {
 
 	cnn, err := lxd.ConnectLXD("https://"+h+":8443", args)
 	if err != nil {
-		log.Println(err)
+		log.Warnln(err)
 	}
 	return cnn
 }
