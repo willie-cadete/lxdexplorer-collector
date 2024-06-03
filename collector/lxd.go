@@ -23,39 +23,35 @@ func (s *Collector) Connect(h string) lxd.InstanceServer {
 
 func (s *Collector) ParseContainer(c api.ContainerFull, h string) Container {
 
-	if utils.Capitalize(c.State.Status) == "Stopped" {
-		return Container{
-			Name:     strings.ToLower(c.Name),
-			Hostnode: strings.ToLower(h),
-			Status:   utils.Capitalize(c.State.Status),
-			Network: Network{
-				IPs:     "N/A",
-				Netmask: "N/A",
-				CIDR:    "N/A",
-			},
-			OS: OS{
-				Distribution: utils.Capitalize(c.Config["image.os"]),
-				Version:      utils.Capitalize(c.Config["image.release"]),
-			},
-			ImageID: c.Config["volatile.base_image"][:6],
-		}
-	}
-
-	return Container{
+	container := Container{
 		Name:     strings.ToLower(c.Name),
 		Hostnode: strings.ToLower(h),
-		Status:   c.State.Status,
-		Network: Network{
-			IPs:     c.State.Network["eth0"].Addresses[0].Address,
-			Netmask: c.State.Network["eth0"].Addresses[0].Netmask,
-			CIDR:    c.State.Network["eth0"].Addresses[0].Address + "/" + c.State.Network["eth0"].Addresses[0].Netmask,
-		},
+		Status:   utils.Capitalize(c.State.Status),
 		OS: OS{
 			Distribution: utils.Capitalize(c.Config["image.os"]),
 			Version:      utils.Capitalize(c.Config["image.release"]),
 		},
 		ImageID: c.Config["volatile.base_image"][:6],
 	}
+
+	if utils.Capitalize(c.State.Status) == "Stopped" {
+		container.Network = Network{
+			IPs:     "N/A",
+			Netmask: "N/A",
+			CIDR:    "N/A",
+		}
+
+		return container
+	}
+
+	container.Network = Network{
+		IPs:     c.State.Network["eth0"].Addresses[0].Address,
+		Netmask: c.State.Network["eth0"].Addresses[0].Netmask,
+		CIDR:    c.State.Network["eth0"].Addresses[0].Address + "/" + c.State.Network["eth0"].Addresses[0].Netmask,
+	}
+
+	return container
+
 }
 
 func (s *Collector) AddLXDTTLs() error {
