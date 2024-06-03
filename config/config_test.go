@@ -1,7 +1,6 @@
 package config_test
 
 import (
-	"os"
 	"testing"
 
 	"github.com/willie-cadete/lxdexplorer-collector/config"
@@ -25,7 +24,7 @@ type ConfOpts struct {
 	Hostnodes []string
 }
 
-func configFactory(opts ConfOpts) *config.Config {
+func CreateConfig(opts ConfOpts) *config.Config {
 
 	return &config.Config{
 		Collector: config.Collector{
@@ -63,7 +62,7 @@ func TestLoadConfigWithDefaults(t *testing.T) {
 		Hostnodes: []string{"https://localhost:8443"},
 	}
 
-	expected := configFactory(cfgTest)
+	expected := CreateConfig(cfgTest)
 
 	assert.Nil(t, err)
 	assert.Equal(t, expected, cfg)
@@ -83,7 +82,7 @@ func TestLoadConfigWithCustomValues(t *testing.T) {
 		Hostnodes: []string{"127.0.0.2"},
 	}
 
-	expected := configFactory(cfgTest)
+	expected := CreateConfig(cfgTest)
 
 	assert.Nil(t, err)
 	assert.Equal(t, expected, cfg)
@@ -143,14 +142,15 @@ func TestGetLoggingLevel(t *testing.T) {
 
 func TestLoadConfigWithEnvVariablesOverride(t *testing.T) {
 	// Set environment variables
-	_ = os.Setenv("COLLECTOR_INTERVAL", "5")
-	_ = os.Setenv("COLLECTOR_RETENTION", "5")
-	_ = os.Setenv("LOGGING_LEVEL", "error")
-	_ = os.Setenv("DATABASE_URI", "mongodb://localhost:27015")
-	_ = os.Setenv("LXD_TLS_CERTIFICATE", "./tls/client2.crt")
-	_ = os.Setenv("LXD_TLS_KEY", "./tls/client2.key")
-	_ = os.Setenv("LXD_TLS_VERIFY", "false")
-	_ = os.Setenv("LXD_HOSTNODES", "https://localhost:8443,https://localhost:8444")
+
+	t.Setenv("COLLECTOR_INTERVAL", "5")
+	t.Setenv("COLLECTOR_RETENTION", "5")
+	t.Setenv("LOGGING_LEVEL", "error")
+	t.Setenv("DATABASE_URI", "mongodb://localhost:27015")
+	t.Setenv("LXD_TLS_CERTIFICATE", "./tls/client2.crt")
+	t.Setenv("LXD_TLS_KEY", "./tls/client2.key")
+	t.Setenv("LXD_TLS_VERIFY", "false")
+	t.Setenv("LXD_HOSTNODES", "https://localhost:8443,https://localhost:8444")
 
 	cfg, err := config.LoadConfig("testdata")
 
@@ -165,7 +165,7 @@ func TestLoadConfigWithEnvVariablesOverride(t *testing.T) {
 		Hostnodes: []string{"https://localhost:8443", "https://localhost:8444"},
 	}
 
-	expected := configFactory(cfgTest)
+	expected := CreateConfig(cfgTest)
 
 	assert.Nil(t, err)
 	assert.Equal(t, expected, cfg)
