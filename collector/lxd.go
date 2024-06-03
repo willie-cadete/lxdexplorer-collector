@@ -2,6 +2,7 @@ package collector
 
 import (
 	"os"
+	"strings"
 	"time"
 
 	lxd "github.com/canonical/lxd/client"
@@ -24,8 +25,8 @@ func (s *Collector) ParseContainer(c api.ContainerFull, h string) Container {
 
 	if utils.Capitalize(c.State.Status) == "Stopped" {
 		return Container{
-			Name:     utils.Lowercase(c.Name),
-			Hostnode: utils.Lowercase(h),
+			Name:     strings.ToLower(c.Name),
+			Hostnode: strings.ToLower(h),
 			Status:   utils.Capitalize(c.State.Status),
 			Network: Network{
 				IPs:     "N/A",
@@ -41,8 +42,8 @@ func (s *Collector) ParseContainer(c api.ContainerFull, h string) Container {
 	}
 
 	return Container{
-		Name:     utils.Lowercase(c.Name),
-		Hostnode: utils.Lowercase(h),
+		Name:     strings.ToLower(c.Name),
+		Hostnode: strings.ToLower(h),
 		Status:   c.State.Status,
 		Network: Network{
 			IPs:     c.State.Network["eth0"].Addresses[0].Address,
@@ -125,7 +126,7 @@ func (s *Collector) getHostnodes() []string {
 
 	hostnodes := s.config.GetHostnodes()
 	for i, node := range hostnodes {
-		hostnodes[i] = utils.Lowercase(node)
+		hostnodes[i] = strings.ToLower(node)
 	}
 	return hostnodes
 }
