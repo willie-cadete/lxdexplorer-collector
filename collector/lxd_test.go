@@ -12,11 +12,23 @@ import (
 )
 
 const (
-	mongodb_uri = "mongodb://localhost:27017"
-	lxd_host    = "localhost"
-	lxd_cert    = "./tls/client.crt"
-	lxd_key     = "./tls/client.key"
+	lxd_host string = "localhost"
+	lxd_cert string = "./tls/client.crt"
+	lxd_key  string = "./tls/client.key"
 )
+
+func CreateConfig() *config.Config {
+	return &config.Config{
+		LXD: config.LXD{
+			TLS: config.TLS{
+				Cert:   lxd_cert,
+				Key:    lxd_key,
+				Verify: false,
+			},
+			Hostnodes: []string{lxd_host},
+		},
+	}
+}
 
 func TestConnect(t *testing.T) {
 
@@ -28,28 +40,9 @@ func TestConnect(t *testing.T) {
 	}{
 
 		{
-			name: "TestConnectErrorInvalidHost",
-			config: &config.Config{
-				Collector: config.Collector{
-					Interval:  10,
-					Retention: 10,
-				},
-				Logging: config.Logging{
-					Level: "info",
-				},
-				Database: config.Database{
-					URI: mongodb_uri,
-				},
-				LXD: config.LXD{
-					TLS: config.TLS{
-						Cert:   lxd_cert,
-						Key:    lxd_key,
-						Verify: false,
-					},
-					Hostnodes: []string{lxd_host},
-				},
-			},
-			host: "invalidhost",
+			name:   "TestConnectErrorInvalidHost",
+			config: CreateConfig(),
+			host:   "invalidhost",
 			asset: func(result lxd.InstanceServer) {
 				assert.Nil(t, result, "Expected nil, InvalidHost")
 			},
@@ -76,27 +69,8 @@ func TestAddLXDTTLs(t *testing.T) {
 		asset    func(err error)
 	}{
 		{
-			name: "TestAddLXDTTLs",
-			config: &config.Config{
-				Collector: config.Collector{
-					Interval:  10,
-					Retention: 10,
-				},
-				Logging: config.Logging{
-					Level: "info",
-				},
-				Database: config.Database{
-					URI: mongodb_uri,
-				},
-				LXD: config.LXD{
-					TLS: config.TLS{
-						Cert:   lxd_cert,
-						Key:    lxd_key,
-						Verify: false,
-					},
-					Hostnodes: []string{lxd_host},
-				},
-			},
+			name:   "TestAddLXDTTLs",
+			config: CreateConfig(),
 			asset: func(err error) {
 				assert.NoError(t, err, "Expected no error")
 			},
@@ -105,27 +79,8 @@ func TestAddLXDTTLs(t *testing.T) {
 			},
 		},
 		{
-			name: "TestAddLXDTTLsError",
-			config: &config.Config{
-				Collector: config.Collector{
-					Interval:  10,
-					Retention: 10,
-				},
-				Logging: config.Logging{
-					Level: "info",
-				},
-				Database: config.Database{
-					URI: mongodb_uri,
-				},
-				LXD: config.LXD{
-					TLS: config.TLS{
-						Cert:   lxd_cert,
-						Key:    lxd_key,
-						Verify: false,
-					},
-					Hostnodes: []string{lxd_host},
-				},
-			},
+			name:   "TestAddLXDTTLsError",
+			config: CreateConfig(),
 			asset: func(err error) {
 				assert.Error(t, err, "Expected error")
 			},
