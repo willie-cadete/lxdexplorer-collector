@@ -14,29 +14,56 @@ const (
 	lxd_key  = "./tls/client.key"
 )
 
-func TestLoadConfigWithDefaults(t *testing.T) {
-	cfg, err := config.LoadConfig("NotExistingPath")
+type ConfOpts struct {
+	Interval  int
+	Retention int
+	LogLevel  string
+	URI       string
+	LxdCert   string
+	LxdKey    string
+	LxdVerify bool
+	Hostnodes []string
+}
 
-	expected := &config.Config{
+func configFactory(opts ConfOpts) *config.Config {
+
+	return &config.Config{
 		Collector: config.Collector{
-			Interval:  60,
-			Retention: 60,
+			Interval:  opts.Interval,
+			Retention: opts.Retention,
 		},
 		Logging: config.Logging{
-			Level: "info",
+			Level: opts.LogLevel,
 		},
 		Database: config.Database{
-			URI: "mongodb://localhost:27017",
+			URI: opts.URI,
 		},
 		LXD: config.LXD{
 			TLS: config.TLS{
-				Cert:   lxd_cert,
-				Key:    lxd_key,
-				Verify: false,
+				Cert:   opts.LxdCert,
+				Key:    opts.LxdKey,
+				Verify: opts.LxdVerify,
 			},
-			Hostnodes: []string{"https://localhost:8443"},
+			Hostnodes: opts.Hostnodes,
 		},
 	}
+}
+
+func TestLoadConfigWithDefaults(t *testing.T) {
+	cfg, err := config.LoadConfig("NotExistingPath")
+
+	cfgTest := ConfOpts{
+		Interval:  60,
+		Retention: 60,
+		LogLevel:  "info",
+		URI:       "mongodb://localhost:27017",
+		LxdCert:   lxd_cert,
+		LxdKey:    lxd_key,
+		LxdVerify: false,
+		Hostnodes: []string{"https://localhost:8443"},
+	}
+
+	expected := configFactory(cfgTest)
 
 	assert.Nil(t, err)
 	assert.Equal(t, expected, cfg)
@@ -45,26 +72,18 @@ func TestLoadConfigWithDefaults(t *testing.T) {
 func TestLoadConfigWithCustomValues(t *testing.T) {
 	cfg, err := config.LoadConfig("testdata")
 
-	expected := &config.Config{
-		Collector: config.Collector{
-			Interval:  10,
-			Retention: 10,
-		},
-		Logging: config.Logging{
-			Level: "warn",
-		},
-		Database: config.Database{
-			URI: "mongodb://localhost:27016",
-		},
-		LXD: config.LXD{
-			TLS: config.TLS{
-				Cert:   lxd_cert,
-				Key:    lxd_key,
-				Verify: true,
-			},
-			Hostnodes: []string{"127.0.0.2"},
-		},
+	cfgTest := ConfOpts{
+		Interval:  10,
+		Retention: 10,
+		LogLevel:  "warn",
+		URI:       "mongodb://localhost:27016",
+		LxdCert:   lxd_cert,
+		LxdKey:    lxd_key,
+		LxdVerify: true,
+		Hostnodes: []string{"127.0.0.2"},
 	}
+
+	expected := configFactory(cfgTest)
 
 	assert.Nil(t, err)
 	assert.Equal(t, expected, cfg)
@@ -135,26 +154,18 @@ func TestLoadConfigWithEnvVariablesOverride(t *testing.T) {
 
 	cfg, err := config.LoadConfig("testdata")
 
-	expected := &config.Config{
-		Collector: config.Collector{
-			Interval:  5,
-			Retention: 5,
-		},
-		Logging: config.Logging{
-			Level: "error",
-		},
-		Database: config.Database{
-			URI: "mongodb://localhost:27015",
-		},
-		LXD: config.LXD{
-			TLS: config.TLS{
-				Cert:   "./tls/client2.crt",
-				Key:    "./tls/client2.key",
-				Verify: false,
-			},
-			Hostnodes: []string{"https://localhost:8443", "https://localhost:8444"},
-		},
+	cfgTest := ConfOpts{
+		Interval:  5,
+		Retention: 5,
+		LogLevel:  "error",
+		URI:       "mongodb://localhost:27015",
+		LxdCert:   "./tls/client2.crt",
+		LxdKey:    "./tls/client2.key",
+		LxdVerify: false,
+		Hostnodes: []string{"https://localhost:8443", "https://localhost:8444"},
 	}
+
+	expected := configFactory(cfgTest)
 
 	assert.Nil(t, err)
 	assert.Equal(t, expected, cfg)
