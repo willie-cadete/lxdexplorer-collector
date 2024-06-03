@@ -75,30 +75,30 @@ func LoadConfig(fp string) (*Config, error) {
 	viper.SetConfigName("config")
 	viper.AddConfigPath(fp)
 
-	log.Debugf("Loading config file: %s", fp)
+	log.Debugf("Config: Loading config file: %s", fp)
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			log.Warnf("Config file not found; using default values")
+			log.Warnf("Config: Config file not found; using default values")
 			setDefaults()
 		} else {
-			log.Errorf("Error reading config file, %s", err)
+			log.Errorf("Config: Error reading config file, %s", err)
 		}
 	} else {
-		log.Infof("Using config file: %s", viper.ConfigFileUsed())
+		log.Infof("Config: Using config file: %s", viper.ConfigFileUsed())
 	}
 
 	for _, key := range viper.AllKeys() {
 		envKey := strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
 		err := viper.BindEnv(key, envKey)
 		if err != nil {
-			log.Println("config: unable to bind env: " + err.Error())
+			log.Infoln("Config: Unable to bind env: " + err.Error())
 		}
 	}
 
 	var c Config
 	if err := viper.Unmarshal(&c); err != nil {
-		return nil, fmt.Errorf("unable to decode into struct, %v", err)
+		return nil, fmt.Errorf("Config: Unable to decode into struct, %v", err)
 	}
 
 	return &c, nil

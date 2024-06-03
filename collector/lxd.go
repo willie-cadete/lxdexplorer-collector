@@ -57,19 +57,27 @@ func (s *Collector) ParseContainer(c api.ContainerFull, h string) Container {
 	}
 }
 
+// TODO: Implement function properly to add TTLs to the collections working on the errors handling
 func (s *Collector) AddLXDTTLs() error {
 	err := s.database.AddTTL("containers", "collectedat", int32(s.config.GetCollectorInterval()))
 	if err != nil {
 		return err
 	}
-	log.Printf("Fetcher: Added TTL to containers collection: %d seconds", s.config.GetCollectorInterval())
+	log.Infof("Collector: Setting collection interval of %d seconds", s.config.GetCollectorInterval())
 
-	log.Printf("Fetcher: Added TTL to history collection: %d days", s.config.GetCollectorRetention())
+	log.Infof("Collector: Setting collection history of %d days", s.config.GetCollectorRetention())
 	err = s.database.AddTTL("history", "collectedat", int32(s.config.GetCollectorRetention()*60*60*24))
 	return err
 }
 
 func (s *Collector) WorkerCollect() {
+	start := time.Now()
+
+	defer func() {
+		log.Infoln("Collector: Collection took: ", time.Since(start))
+	}()
+
+	log.Infoln("Collector: Starting collection from", len(s.getHostnodes()), "hostnodes...")
 
 	collectedAt := time.Now().UTC()
 
@@ -78,18 +86,21 @@ func (s *Collector) WorkerCollect() {
 		if c == nil {
 			continue
 		}
+
+		startContainer := time.Now()
 		cs, _ := c.GetContainersFull()
 
 		for _, c := range cs {
-			log.Debugln("Fetcher: ", c.Name, h)
-			log.Debugln("Fetcher: Parsing container", c.Name, "has status", c.State, c.Config, "from", h)
+
+			log.Debugln("Collector: ", c.Name, h)
+			log.Debugln("Collector: Parsing container", c.Name, "has status", c.State, c.Config, "from", h)
 			container := s.ParseContainer(c, h)
-			log.Debugln("Fetcher: Parsed container", container.Name, "has status", container.Status, container.Network, container.OS, container.ImageID, "from", h)
+			log.Debugln("Collector: Parsed container", container.Name, "has status", container.Status, container.Network, container.OS, container.ImageID, "from", h)
 			s.database.InsertMany("containers", []interface{}{Container{CollectedAt: collectedAt, Name: container.Name, Hostnode: container.Hostnode, Status: container.Status, Network: container.Network, OS: container.OS, ImageID: container.ImageID}})
 		}
 
 		s.database.InsertMany("history", []interface{}{HostNode{CollectedAt: collectedAt, Hostname: h, Containers: cs}})
-		log.Println("Fetcher: Inserted", len(cs), "containers from hostnode:", h)
+		log.Infoln("Collector: Collected", len(cs), "containers from hostnode:", h, "in", time.Since(startContainer))
 
 	}
 

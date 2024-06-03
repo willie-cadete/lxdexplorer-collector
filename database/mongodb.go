@@ -52,7 +52,7 @@ func (s *Database) FindAll(collection string) ([]primitive.M, error) {
 	cur, err := c.Database(database).Collection(collection).Find(context.Background(), bson.D{})
 
 	if err != nil {
-		log.Println(err)
+		log.Info(err)
 		return nil, err
 	}
 
@@ -61,7 +61,7 @@ func (s *Database) FindAll(collection string) ([]primitive.M, error) {
 		var result bson.M
 		err := cur.Decode(&result)
 		if err != nil {
-			log.Println(err)
+			log.Info(err)
 			return nil, err
 		}
 		results = append(results, result)
@@ -98,7 +98,7 @@ func (s *Database) AddTTL(collection string, field string, seconds int32) error 
 		if err != nil {
 			return err
 		}
-		// log.Printf("Database: Dropped existing TTL index on %s\n", field)
+		log.Debugln("Database: Dropped existing TTL index on", collection, "field", field)
 		// Create a new index
 		_, err = indexView.CreateOne(context.Background(), indexModel)
 		if err != nil {
