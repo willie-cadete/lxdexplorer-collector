@@ -15,7 +15,6 @@ func main() {
 	// Log the version
 	log.Info("LXD Explorer Collector Version: " + version)
 
-	// TODO: Implement the reading configuration file dynamically from different paths
 	conf, err := config.LoadConfig(".")
 	if err != nil {
 		panic(err)

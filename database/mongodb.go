@@ -25,7 +25,6 @@ func (s *Database) InsertOne(collection string, document interface{}) {
 
 }
 
-// TODO: Return Error
 func (s *Database) InsertMany(collection string, documents []interface{}) {
 	c := s.connect()
 	defer c.Disconnect(context.Background())
@@ -78,7 +77,6 @@ func (s *Database) ReplaceOne(collection string, filter interface{}, replacement
 	return c.Database(database).Collection(collection).ReplaceOne(context.Background(), filter, replacement)
 }
 
-// TODO: Return Error
 func (s *Database) AddTTL(collection string, field string, seconds int32) error {
 	c := s.connect()
 	defer c.Disconnect(context.Background())

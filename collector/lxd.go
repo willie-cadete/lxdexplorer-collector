@@ -57,7 +57,6 @@ func (s *Collector) ParseContainer(c api.ContainerFull, h string) Container {
 	}
 }
 
-// TODO: Implement function properly to add TTLs to the collections working on the errors handling
 func (s *Collector) AddLXDTTLs() error {
 	err := s.database.AddTTL("containers", "collectedat", int32(s.config.GetCollectorInterval()))
 	if err != nil {
